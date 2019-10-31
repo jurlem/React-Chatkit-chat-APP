@@ -87,6 +87,7 @@ class App extends React.Component {
     return (
       <div className="app">
         <RoomList
+          roomId={this.state.roomId}
           subscribeToRoomMultipart={this.subscribeToRoomMultipart}
           rooms={[...this.state.joinableRooms, ...this.state.joinedRooms]}
         />
