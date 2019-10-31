@@ -12,44 +12,11 @@ import {tokenUrl, instanceLocator} from './config';
 class App extends React.Component {
   state = {
     messages: [],
+    joinableRooms: [],
+    joinedRooms: [],
   };
 
   componentDidMount () {
-    // const chatManager = new Chatkit.ChatManager ({
-    //   instanceLocator,
-    //   userId: 'merleChat',
-    //   tokenProvider: new Chatkit.TokenProvider ({
-    //     url: tokenUrl,
-    //   }),
-    // });
-
-    // chatManager
-    //   .connect ()
-    //   .then (currentUser => {
-    //     currentUser.sendSimpleMessage ({
-    //       text: '',
-    //       roomId: '8b1aee9a-ae14-4740-ac6b-81f54a454a10',
-    //     }), currentUser.subscribeToRoomMultipart ({
-    //       roomId: '8b1aee9a-ae14-4740-ac6b-81f54a454a10',
-    //       messageLimit: 20,
-    //       hooks: {
-    //         onMessage: message => {
-    //           console.log (
-    //             currentUser.id,
-    //             message.parts[0].payload.content,
-    //             message.createdAt,
-    //             message.text
-    //           );
-    //         },
-    //       },
-    //     });
-    //   })
-    //   .catch (error => {
-    //     console.error ('error', error);
-    //   });
-
-    // SIIT ALGAB
-
     const chatManager = new Chatkit.ChatManager ({
       instanceLocator,
       userId: 'merleChat',
@@ -63,10 +30,16 @@ class App extends React.Component {
       .then (currentUser => {
         this.currentUser = currentUser;
         console.log ('Connected as user ', currentUser);
-        // this.currentUser.sendSimpleMessage ({
-        //   text: 'messageToSend',
-        //   roomId: '8b1aee9a-ae14-4740-ac6b-81f54a454a10',
-        // }),
+
+        this.currentUser
+          .getJoinableRooms ()
+          .then (joinableRooms => {
+            this.setState ({
+              joinableRooms,
+              joinedRooms: this.currentUser.rooms,
+            });
+          })
+          .catch (error => console.log (error, 'error on joinableRooms'));
         this.currentUser.subscribeToRoomMultipart ({
           roomId: '8b1aee9a-ae14-4740-ac6b-81f54a454a10',
           messageLimit: 10,
@@ -83,7 +56,7 @@ class App extends React.Component {
         });
       })
       .catch (error => {
-        console.error ('error:', error);
+        console.error ('error on connecting', error);
       });
   }
 
@@ -95,9 +68,12 @@ class App extends React.Component {
   };
 
   render () {
+    console.log (this.currentUser);
     return (
       <div className="app">
-        <RoomList />
+        <RoomList
+          rooms={[...this.state.joinableRooms, ...this.state.joinedRooms]}
+        />
         <MessageList messages={this.state.messages} />
         <SendMessageForm sendMessage={this.sendMessage} />
         <NewRoomForm />
