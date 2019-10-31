@@ -81,6 +81,14 @@ class App extends React.Component {
       })
       .catch (error => console.log (error, 'error on joinableRooms'));
   };
+  createRoom = name => {
+    this.currentUser
+      .createRoom ({
+        name,
+      })
+      .then (room => this.subscribeToRoomMultipart (room.id))
+      .catch (err => console.log (err, 'errot creating room'));
+  };
 
   render () {
     console.log (this.currentUser);
@@ -91,9 +99,15 @@ class App extends React.Component {
           subscribeToRoomMultipart={this.subscribeToRoomMultipart}
           rooms={[...this.state.joinableRooms, ...this.state.joinedRooms]}
         />
-        <MessageList messages={this.state.messages} />
-        <SendMessageForm sendMessage={this.sendMessage} />
-        <NewRoomForm />
+        <MessageList
+          roomId={this.state.roomId}
+          messages={this.state.messages}
+        />
+        <SendMessageForm
+          disabled={!this.state.roomId}
+          sendMessage={this.sendMessage}
+        />
+        <NewRoomForm createRoom={this.createRoom} />
       </div>
     );
   }
